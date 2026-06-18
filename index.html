@@ -1,0 +1,2471 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>打工防禦戰</title>
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #5d6b78;
+      --paper: #f7f4ec;
+      --phone: #fffdf7;
+      --line: #d8e0e6;
+      --teal: #087f8c;
+      --teal-dark: #055f69;
+      --amber: #f7b538;
+      --danger: #c03221;
+      --danger-soft: #fff1ee;
+      --success: #1d8746;
+      --success-soft: #eaf8ef;
+      --safe-blue: #22577a;
+      --shadow: 0 22px 55px rgba(23, 33, 43, 0.18);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(90deg, rgba(34, 87, 122, 0.08) 1px, transparent 1px),
+        linear-gradient(rgba(34, 87, 122, 0.08) 1px, transparent 1px),
+        var(--paper);
+      background-size: 34px 34px;
+      color: var(--ink);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      letter-spacing: 0;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px 16px;
+    }
+
+    .game-shell {
+      width: min(100%, 430px);
+      height: min(860px, calc(100vh - 48px));
+      min-height: 680px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+      border: 10px solid #1f2a35;
+      border-radius: 32px;
+      background: var(--phone);
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .topbar {
+      display: grid;
+      gap: 8px;
+      padding: 12px 14px 10px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--safe-blue);
+      color: white;
+      font-size: 22px;
+      flex: 0 0 auto;
+    }
+
+    .brand-text {
+      min-width: 0;
+    }
+
+    .brand-text h1 {
+      margin: 0;
+      font-size: 1.22rem;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .brand-text p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.35;
+    }
+
+    .toolbox-button {
+      min-height: 40px;
+      padding: 7px 11px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      border: 2px solid var(--teal);
+      border-radius: var(--radius);
+      color: var(--teal-dark);
+      background: #ecfbfd;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .collection-button {
+      min-height: 40px;
+      width: 40px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--safe-blue);
+      border-radius: var(--radius);
+      color: var(--safe-blue);
+      background: #f0f6fb;
+      font-size: 1.12rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .toolbox-button:focus-visible,
+    .collection-button:focus-visible,
+    .hint-button:focus-visible,
+    .choice-button:focus-visible,
+    .next-button:focus-visible,
+    .modal-button:focus-visible,
+    .close-button:focus-visible {
+      outline: 4px solid rgba(247, 181, 56, 0.75);
+      outline-offset: 3px;
+    }
+
+    .status-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      border-radius: var(--radius);
+      background: #f2f6f8;
+      color: var(--safe-blue);
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .metrics-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .wallet-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fffdf7;
+      color: var(--ink);
+      font-weight: 900;
+      font-size: 0.86rem;
+    }
+
+    .timer-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 8px;
+      border-radius: var(--radius);
+      background: #f8fbfb;
+      border: 1px solid var(--line);
+      color: var(--safe-blue);
+      font-weight: 900;
+      font-size: 0.86rem;
+    }
+
+    .timer-meter {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e9eef1;
+      border: 1px solid #ccd8df;
+    }
+
+    .money-meter {
+      grid-column: 1 / -1;
+      height: 8px;
+    }
+
+    .timer-meter {
+      grid-column: 1 / -1;
+    }
+
+    .timer-fill {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--teal);
+      transition: width 180ms linear, background 180ms ease;
+    }
+
+    .timer-fill.low {
+      background: var(--danger);
+    }
+
+    .money-meter {
+      grid-column: 1 / -1;
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e9eef1;
+      border: 1px solid #ccd8df;
+    }
+
+    .money-fill {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--success), var(--amber));
+      transition: width 220ms ease;
+    }
+
+    .money-fill.low {
+      background: linear-gradient(90deg, var(--danger), var(--amber));
+    }
+
+    .chat-area {
+      overflow-y: auto;
+      overflow-anchor: none;
+      padding: 18px 14px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background:
+        linear-gradient(180deg, rgba(8, 127, 140, 0.07), transparent 34%),
+        #f8fbfb;
+    }
+
+    .day-label {
+      align-self: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(23, 33, 43, 0.08);
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .message-row {
+      display: flex;
+      gap: 9px;
+      align-items: flex-end;
+    }
+
+    .message-row.student {
+      justify-content: flex-end;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 18px;
+    }
+
+    .bubble {
+      max-width: 82%;
+      padding: 12px 14px;
+      border-radius: 18px;
+      font-size: 1.06rem;
+      line-height: 1.58;
+      box-shadow: 0 2px 0 rgba(23, 33, 43, 0.08);
+    }
+
+    .recruiter .bubble {
+      border-bottom-left-radius: 6px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+    }
+
+    .student .bubble {
+      border-bottom-right-radius: 6px;
+      background: #dff7e8;
+      border: 1px solid #a5dfba;
+    }
+
+    .risk-strip {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 9px;
+      margin-top: 8px;
+      padding: 9px 10px;
+      border-radius: var(--radius);
+      background: #fff7df;
+      border: 1px solid #f1d27a;
+      color: #705100;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .system-message {
+      align-self: center;
+      max-width: 92%;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(23, 33, 43, 0.08);
+      color: #3e4b56;
+      font-size: 0.9rem;
+      font-weight: 800;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .pressure-strip {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 9px;
+      padding: 10px;
+      border-radius: var(--radius);
+      background: #eef3ff;
+      border: 2px solid #b7c9f2;
+      color: #233a70;
+      font-weight: 900;
+      line-height: 1.4;
+    }
+
+    .choices-panel {
+      padding: 14px;
+      background: #ffffff;
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 10px;
+    }
+
+    .decision-tools {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      min-height: 0;
+    }
+
+    .hint-button {
+      min-height: 34px;
+      padding: 6px 10px;
+      border: 2px solid #d5b44a;
+      border-radius: 999px;
+      background: #fff7df;
+      color: #6c4d00;
+      font-size: 0.9rem;
+      font-weight: 900;
+      cursor: pointer;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .hint-button:disabled {
+      cursor: default;
+      opacity: 0.72;
+    }
+
+    .purchased-hint {
+      display: none;
+      grid-template-columns: auto 1fr;
+      gap: 9px;
+      padding: 10px;
+      border-radius: var(--radius);
+      background: #fff7df;
+      border: 1px solid #f1d27a;
+      color: #705100;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .purchased-hint.show {
+      display: grid;
+    }
+
+    .feedback-banner {
+      min-height: 40px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: var(--radius);
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .feedback-banner.show {
+      display: flex;
+    }
+
+    .feedback-banner.success {
+      background: var(--success-soft);
+      border: 2px solid var(--success);
+      color: #0e612f;
+    }
+
+    .feedback-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .next-button {
+      min-height: 38px;
+      padding: 7px 10px;
+      border: 0;
+      border-radius: var(--radius);
+      background: var(--success);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .end-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .choices {
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice-button {
+      min-height: 58px;
+      width: 100%;
+      padding: 12px 14px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+      border: 2px solid #9fb0bd;
+      border-radius: var(--radius);
+      background: #ffffff;
+      color: var(--ink);
+      text-align: left;
+      font-size: 1.02rem;
+      line-height: 1.35;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .choice-button:hover {
+      border-color: var(--teal);
+      background: #f2fbfc;
+    }
+
+    .choice-button.correct {
+      border-color: var(--success);
+      background: var(--success-soft);
+    }
+
+    .choice-button:disabled {
+      cursor: default;
+      opacity: 0.72;
+    }
+
+    .choice-icon {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #edf3f6;
+      font-size: 17px;
+      flex: 0 0 auto;
+    }
+
+    .choice-arrow {
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: end center;
+      padding: 16px;
+      background: rgba(23, 33, 43, 0.48);
+      z-index: 10;
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 230px;
+      transform: translateX(-50%) translateY(8px);
+      z-index: 9;
+      width: min(calc(100% - 40px), 340px);
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      background: #17212b;
+      color: #ffffff;
+      font-weight: 900;
+      line-height: 1.35;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+      box-shadow: 0 12px 24px rgba(23, 33, 43, 0.24);
+      text-align: center;
+      border: 2px solid var(--amber);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .modal-backdrop.open {
+      display: grid;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-height: 86%;
+      overflow-y: auto;
+      border-radius: 16px;
+      background: #ffffff;
+      border: 3px solid var(--ink);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.22);
+      animation: modalIn 160ms ease-out;
+    }
+
+    .modal-card.danger {
+      border-color: var(--danger);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-title {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.22rem;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .close-button {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--ink);
+    }
+
+    .modal-body {
+      padding: 14px 16px 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .impact-box {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: var(--danger-soft);
+      border: 2px solid #eeaea5;
+      line-height: 1.55;
+      font-weight: 800;
+    }
+
+    .loss-box {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: #fff7df;
+      border: 2px solid #f1d27a;
+      line-height: 1.5;
+      font-weight: 900;
+    }
+
+    .hint-box,
+    .tool-result {
+      padding: 12px;
+      border-radius: var(--radius);
+      background: #eff7ff;
+      border: 2px solid #b7d7ef;
+      line-height: 1.55;
+      font-weight: 750;
+    }
+
+    .check-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 9px;
+    }
+
+    .check-list li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      line-height: 1.45;
+      font-weight: 750;
+    }
+
+    .collection-grid {
+      display: grid;
+      gap: 9px;
+    }
+
+    .ending-card {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 9px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #f7fafb;
+      line-height: 1.42;
+      font-weight: 800;
+    }
+
+    .ending-card.locked {
+      color: var(--muted);
+      background: #f1f3f4;
+    }
+
+    .ending-card strong {
+      display: block;
+      margin-bottom: 2px;
+      color: var(--ink);
+    }
+
+    .collection-summary {
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      background: var(--success-soft);
+      border: 2px solid #a7dfb9;
+      font-weight: 900;
+      line-height: 1.45;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 9px;
+      padding: 0 16px 16px;
+    }
+
+    .modal-button {
+      min-height: 48px;
+      border: 0;
+      border-radius: var(--radius);
+      background: var(--teal);
+      color: white;
+      font-weight: 900;
+      cursor: pointer;
+      font-size: 1.02rem;
+    }
+
+    .modal-button.secondary {
+      background: #eef3f5;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .sr-live {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .success-pulse {
+      animation: successPulse 520ms ease-out;
+    }
+
+    @keyframes modalIn {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes successPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(29, 135, 70, 0.45);
+      }
+      100% {
+        box-shadow: 0 0 0 18px rgba(29, 135, 70, 0);
+      }
+    }
+
+    @media (max-width: 390px) {
+      .page {
+        padding: 0;
+      }
+
+      .game-shell {
+        width: 100%;
+        height: 100vh;
+        min-height: 100vh;
+        border: 0;
+        border-radius: 0;
+      }
+
+      .app-header {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .toolbox-button {
+        width: 100%;
+      }
+
+      .header-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr auto;
+      }
+
+      .bubble {
+        max-width: 88%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="game-shell" aria-label="打工防禦戰遊戲畫面">
+      <header class="topbar">
+        <div class="app-header">
+          <div class="brand">
+            <div class="brand-mark" aria-hidden="true">🛡️</div>
+            <div class="brand-text">
+              <h1>打工防禦戰</h1>
+              <p>求職訊息判斷練習</p>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button class="toolbox-button" id="toolboxButton" type="button">
+              <span aria-hidden="true">🔍</span>
+              查證工具箱
+            </button>
+            <button class="collection-button" id="collectionButton" type="button" aria-label="打開結局圖鑑">🏅</button>
+          </div>
+        </div>
+
+        <div class="status-row" aria-live="polite">
+          <span id="stageLabel">第 1/9 關</span>
+          <span id="scoreLabel" class="sr-live">0 分</span>
+        </div>
+        <div class="metrics-row">
+          <div class="wallet-row" aria-live="polite">
+            <span>遊戲存款</span>
+            <span id="moneyLabel">$10,000</span>
+            <div class="money-meter" aria-hidden="true"><div class="money-fill" id="moneyFill"></div></div>
+          </div>
+          <div class="timer-row" aria-live="polite">
+            <span>已讀壓力</span>
+            <span id="timerLabel">15 秒</span>
+            <div class="timer-meter" aria-hidden="true"><div class="timer-fill" id="timerFill"></div></div>
+          </div>
+        </div>
+      </header>
+
+      <section class="chat-area" id="chatArea" aria-label="求職對話">
+        <div class="day-label">今天 16:20</div>
+      </section>
+
+      <footer class="choices-panel" aria-label="回應選項">
+        <div class="feedback-banner" id="feedbackBanner" role="status"></div>
+        <div class="decision-tools">
+          <button class="hint-button" id="buyHintButton" type="button">💡 -$500</button>
+          <div class="purchased-hint" id="purchasedHint">
+            <span aria-hidden="true">🔎</span>
+            <span id="hintPreview">觀察提示會顯示在這裡。</span>
+          </div>
+        </div>
+        <div class="choices" id="choices"></div>
+      </footer>
+
+      <div class="modal-backdrop open" id="startModal" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+        <article class="modal-card">
+          <div class="modal-head">
+            <h2 class="modal-title" id="startTitle">
+              <span aria-hidden="true">🛡️</span>
+              打工防禦戰
+            </h2>
+          </div>
+          <div class="modal-body">
+            <div class="tool-result">
+              閱讀每段求職對話，判斷哪些要求合理、哪些可能有風險。
+            </div>
+            <ul class="check-list">
+              <li><span aria-hidden="true">📱</span><span>先讀完整段對話，滑到底後才會開始倒數。</span></li>
+              <li><span aria-hidden="true">💡</span><span>需要提示時可以購買提示，會扣遊戲存款。</span></li>
+              <li><span aria-hidden="true">🏅</span><span>不同選擇會解鎖不同結局圖鑑。</span></li>
+            </ul>
+          </div>
+          <div class="modal-actions">
+            <button class="modal-button" id="startGameButton" type="button">開始遊戲</button>
+          </div>
+        </article>
+      </div>
+
+      <div class="modal-backdrop" id="consequenceModal" role="dialog" aria-modal="true" aria-labelledby="consequenceTitle">
+        <article class="modal-card danger">
+          <div class="modal-head">
+            <h2 class="modal-title" id="consequenceTitle">
+              <span aria-hidden="true">🛑</span>
+              後果預覽
+            </h2>
+            <button class="close-button" type="button" data-close-modal aria-label="關閉">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="impact-box">
+              <span aria-hidden="true">⚠️</span>
+              <span id="consequenceText">你的帳戶可能被凍結。</span>
+            </div>
+            <div class="loss-box">
+              <span aria-hidden="true">💸</span>
+              <span id="lossText">存款沒有變動。</span>
+            </div>
+            <div class="hint-box" id="hintText">遇到先收錢的工作，先停下來查證。</div>
+          </div>
+          <div class="modal-actions">
+            <button class="modal-button" type="button" data-close-modal>重新選擇</button>
+          </div>
+        </article>
+      </div>
+
+      <div class="modal-backdrop" id="toolboxModal" role="dialog" aria-modal="true" aria-labelledby="toolboxTitle">
+        <article class="modal-card">
+          <div class="modal-head">
+            <h2 class="modal-title" id="toolboxTitle">
+              <span aria-hidden="true">🔍</span>
+              查證工具箱
+            </h2>
+            <button class="close-button" type="button" data-close-toolbox aria-label="關閉">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="tool-result">
+              <strong>查詢結果：</strong>
+              <span id="toolboxResult">正常徵才不會要求學生先匯保證金、提供帳戶或交出證件正本。</span>
+            </div>
+            <ul class="check-list" id="toolboxChecks">
+              <li><span aria-hidden="true">✅</span><span>先確認公司名稱、地址與電話是否一致。</span></li>
+              <li><span aria-hidden="true">🛑</span><span>出現「先付錢才錄取」要停止回覆。</span></li>
+              <li><span aria-hidden="true">📞</span><span>不確定時，找老師或家人一起看訊息。</span></li>
+            </ul>
+          </div>
+          <div class="modal-actions">
+            <button class="modal-button secondary" type="button" data-close-toolbox>回到對話</button>
+          </div>
+        </article>
+      </div>
+
+      <div class="modal-backdrop" id="collectionModal" role="dialog" aria-modal="true" aria-labelledby="collectionTitle">
+        <article class="modal-card">
+          <div class="modal-head">
+            <h2 class="modal-title" id="collectionTitle">
+              <span aria-hidden="true">🏅</span>
+              結局圖鑑
+            </h2>
+            <button class="close-button" type="button" data-close-collection aria-label="關閉">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="collection-summary" id="collectionSummary">已解鎖 0 張。</div>
+            <div class="collection-grid" id="collectionGrid"></div>
+          </div>
+          <div class="modal-actions">
+            <button class="modal-button secondary" type="button" data-close-collection>回到遊戲</button>
+          </div>
+        </article>
+      </div>
+
+      <div class="sr-live" id="liveRegion" aria-live="assertive"></div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script>
+    const levels = [
+      {
+        id: "typing-deposit",
+        title: "第 1/9 關：假打字員",
+        time: "今天 16:20",
+        riskNote: "觀察提示：注意對方把你帶到哪個付款流程。",
+        toolboxResult: "打字員、資料輸入若要求先付開通費、保證金或制服費，就是高風險徵才。",
+        toolboxChecks: [
+          { icon: "🛑", text: "看到先付款，先停止回覆。" },
+          { icon: "📷", text: "保留廣告與對話截圖。" },
+          { icon: "✅", text: "不轉到私人 Line 繼續談。"}
+        ],
+        messages: [
+          {
+            sender: "recruiter",
+            avatar: "💬",
+            text: "我在 FB 社團看到你留言找打工，這邊急徵資料輸入人員。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "💬",
+            text: "不用面試，工作內容就是整理表格和打字，細節進 Line 群會說。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "💬",
+            text: "想做請先加 Line，我們不在社團公開派單，怕名額被亂搶。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "💬",
+            text: "第一次要繳 500 元教材費兼系統開通，做滿三單會退回。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "💬",
+            text: "名額快滿了，晚上前匯款才保留你的帳號。"
+          }
+        ],
+        choices: [
+          {
+            id: "save-and-block",
+            text: "截圖後先查公司",
+            icon: "📷",
+            correct: true,
+            success: "✅ 防禦成功！你避開了開通費陷阱。"
+          },
+          {
+            id: "ask-on-line",
+            text: "先進 Line 看流程",
+            icon: "💬",
+            correct: false,
+            consequence: "對方把你帶到私人帳號後，會更容易施壓付款，也更難查到原始廣告。",
+            hint: "提示：可疑徵才不要轉到私人通訊軟體。先截圖，再停止互動。"
+          },
+          {
+            id: "small-payment",
+            text: "先付教材費接案",
+            icon: "🧾",
+            correct: false,
+            consequence: "匯款後對方已讀不回或封鎖，錢拿不回來，也會產生挫折感。",
+            hint: "提示：正常工作不會要求求職者先付開通費、保證金或制服費。"
+          }
+        ]
+      },
+      {
+        id: "mule-account",
+        title: "第 2/9 關：人頭帳戶",
+        time: "今天 18:05",
+        riskNote: "觀察提示：分清楚核薪需要資料，還是取得帳戶控制權。",
+        toolboxResult: "公司核薪通常只需存摺封面影本，不需要實體提款卡，更不需要密碼。",
+        toolboxChecks: [
+          { icon: "🛑", text: "提款卡、密碼不可交給任何人。" },
+          { icon: "✅", text: "薪資匯款只提供必要帳戶資料。" },
+          { icon: "📞", text: "可撥打 165 反詐騙專線詢問。" }
+        ],
+        messages: [
+          {
+            sender: "recruiter",
+            avatar: "🏢",
+            text: "面試通過囉！下個月開始會固定匯薪水給你。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🏢",
+            text: "公司要先建新人資料，請一起補身分證正反面、存摺封面。"
+          },
+          {
+            sender: "student",
+            text: "我可以傳存摺封面影本嗎？"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🏢",
+            text: "影本還不夠，金融卡要寄來測試薪轉，密碼給總公司會計審核。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🏢",
+            text: "今天補齊才能排班。審核完會寄回，不會動你的錢，放心。"
+          }
+        ],
+        choices: [
+          {
+            id: "refuse-card",
+            text: "只給註明用途影本",
+            icon: "📄",
+            correct: true,
+            success: "✅ 防禦成功！你守住了帳戶控制權。"
+          },
+          {
+            id: "photo-card",
+            text: "先拍金融卡確認",
+            icon: "📱",
+            correct: false,
+            consequence: "卡號與資料外流後，可能被用來進一步騙取密碼或綁定不明服務。",
+            hint: "提示：核薪不需要提款卡照片。只提供必要資料，並遮住不需要的資訊。"
+          },
+          {
+            id: "mail-card",
+            text: "寄卡片補齊流程",
+            icon: "📦",
+            correct: false,
+            consequence: "帳戶可能淪為洗錢工具，變成警示帳戶，甚至面臨法律責任與賠償。",
+            hint: "提示：實體卡片與密碼交出去，就等於把帳戶控制權交出去。"
+          }
+        ]
+      },
+      {
+        id: "normal-convenience-store",
+        title: "第 3/9 關：正常打工辨識",
+        time: "今天 17:45",
+        riskNote: "觀察提示：分辨合理辦理資料，並保護影本用途。",
+        toolboxResult: "正常辦理勞健保與薪資轉帳，可能需要身分證影本與存摺封面影本；影本可註明用途。",
+        toolboxChecks: [
+          { icon: "✅", text: "確認是正式店家與已錄取流程。" },
+          { icon: "🖊️", text: "影本註明「僅供求職/勞健保使用」。" },
+          { icon: "🛑", text: "不提供提款卡、密碼或證件正本。" }
+        ],
+        messages: [
+          {
+            sender: "recruiter",
+            avatar: "🏪",
+            text: "你明天可以來便利商店報到，排班表我也會給你。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🏪",
+            text: "報到請帶身分證影本和郵局存摺封面影本。"
+          },
+          {
+            sender: "student",
+            text: "這些資料是做什麼用的？"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🏪",
+            text: "辦勞健保和薪資轉帳用，不需要提款卡或密碼。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🏪",
+            text: "你也可以在影本上寫僅供本店報到使用。"
+          }
+        ],
+        choices: [
+          {
+            id: "normal-doc-mark",
+            text: "影本註明用途後提供",
+            icon: "🖊️",
+            correct: true,
+            success: "✅ 判斷成功！你分辨出合理資料需求，也保護了影本用途。"
+          },
+          {
+            id: "normal-overdefense-id",
+            text: "拒絕提供，直接放棄",
+            icon: "🚪",
+            correct: false,
+            consequence: "你把合理報到資料也判成詐騙，可能錯失真實工作機會。",
+            hint: "提示：正常報到可能需要影本資料；重點是確認用途、註明用途，不交正本與密碼。",
+            loss: 1000,
+            endingId: "ending-overdefense-job"
+          },
+          {
+            id: "normal-overshare-card",
+            text: "順便帶提款卡密碼",
+            icon: "🔑",
+            correct: false,
+            consequence: "你提供了不必要且危險的資料。正常薪資轉帳不需要提款卡和密碼。",
+            hint: "提示：合理提供影本，不代表要提供帳戶控制權。",
+            loss: 3000,
+            endingId: "ending-overshare-data"
+          }
+        ]
+      },
+      {
+        id: "pyramid-course",
+        title: "第 4/9 關：假進修真推銷",
+        time: "週三 21:12",
+        riskNote: "觀察提示：注意收入來源是工作成果，還是找人加入。",
+        toolboxResult: "正常兼職不會要求先買產品，也不會主要靠找親友加入來賺錢。",
+        toolboxChecks: [
+          { icon: "🛑", text: "先付費再賺錢，要提高警覺。" },
+          { icon: "👥", text: "靠拉同學加入抽成，是高風險模式。" },
+          { icon: "✅", text: "可向老師或輔導室確認是否合法。" }
+        ],
+        messages: [
+          {
+            sender: "recruiter",
+            avatar: "🙋",
+            text: "我在 IG 看到你想找寒假兼職，這份很適合大學生和高中生。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🙋",
+            text: "工作內容主要是學行銷和分享課程，前期會有教材讓你比較快上手。"
+          },
+          {
+            sender: "student",
+            text: "這是上班前一定要買的嗎？"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🙋",
+            text: "對，教材課程 3000 元。之後你找一個同學來上課就抽 1000。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🙋",
+            text: "工作細節之後進群再講，你人脈不錯，找三個朋友就回本了。"
+          }
+        ],
+        choices: [
+          {
+            id: "check-legality",
+            text: "先詢問收入來源",
+            icon: "🏫",
+            correct: true,
+            success: "✅ 防禦成功！你先停下來，沒有被拉進付費抽成圈。"
+          },
+          {
+            id: "try-course",
+            text: "先買教材進群看",
+            icon: "📚",
+            correct: false,
+            consequence: "你可能買下不需要的課程，還被要求繼續找人加入才能回本。",
+            hint: "提示：工作若先要求你買產品或課程，就不是單純徵才。"
+          },
+          {
+            id: "invite-friends",
+            text: "先找同學一起聽",
+            icon: "👥",
+            correct: false,
+            consequence: "你可能把同學也拉進風險模式，損失金錢並破壞人際關係。",
+            hint: "提示：靠拉下線賺錢的模式，應先停下來查證合法性。"
+          }
+        ]
+      },
+      {
+        id: "normal-restaurant-uniform",
+        title: "第 5/9 關：正常服裝要求",
+        time: "週四 15:10",
+        riskNote: "觀察提示：分辨一般工作服裝要求，還是被迫向公司高價購買。",
+        toolboxResult: "餐飲業要求黑色素面上衣、防滑鞋等一般工作服裝是常見安全規範；若強迫向公司買高價產品才可疑。",
+        toolboxChecks: [
+          { icon: "✅", text: "一般服裝可自行購買，較合理。" },
+          { icon: "🛑", text: "被要求向公司買高價套組，要查證。" },
+          { icon: "👟", text: "防滑鞋可能是工作安全需求。" }
+        ],
+        messages: [
+          {
+            sender: "recruiter",
+            avatar: "🍜",
+            text: "餐飲店錄取囉，週末可以先來試排班。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🍜",
+            text: "上班要穿黑色素面 T 恤，鞋子要防滑，避免廚房地板滑倒。"
+          },
+          {
+            sender: "student",
+            text: "這些要跟店裡買嗎？"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🍜",
+            text: "不用，自己去外面買普通款就可以。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🍜",
+            text: "如果你本來就有黑衣服和防滑鞋，也可以直接穿。"
+          }
+        ],
+        choices: [
+          {
+            id: "normal-uniform-ok",
+            text: "自行準備一般服裝",
+            icon: "👟",
+            correct: true,
+            success: "✅ 判斷成功！你沒有過度防禦，也確認沒有被強迫購買。"
+          },
+          {
+            id: "normal-overdefense-shirt",
+            text: "認定詐騙，拒絕報到",
+            icon: "🚫",
+            correct: false,
+            consequence: "你把合理的工作安全服裝要求誤判成詐騙，可能錯過真實工作。",
+            hint: "提示：要求自行準備一般服裝，和要求向公司買高價產品不同。",
+            loss: 1000,
+            endingId: "ending-overdefense-uniform"
+          },
+          {
+            id: "normal-ignore-spec",
+            text: "不問規格，隨便買",
+            icon: "👟",
+            correct: false,
+            consequence: "你買到不防滑或不符合店內規定的鞋，報到時還是不能安全上班。",
+            hint: "提示：合理要求也要問清楚規格，例如顏色、鞋底防滑需求與是否可用現有衣物。",
+            loss: 600,
+            endingId: "ending-wrong-uniform"
+          }
+        ]
+      },
+      {
+        id: "phone-loan-trap",
+        title: "第 6/9 關：手機空機貸款",
+        time: "週四 20:35",
+        riskNote: "觀察提示：注意合約、分期與帳單到底登記在誰名下。",
+        toolboxResult: "手機空機套利常用「先辦分期、交出手機、之後幫你繳」包裝；實際債務與門號責任可能都在本人名下。",
+        toolboxChecks: [
+          { icon: "🛑", text: "不要為了賺差價去辦不明分期或門號。" },
+          { icon: "📄", text: "合約在誰名下，誰就可能要負責繳款。" },
+          { icon: "👪", text: "涉及貸款、分期、證件時，先找家人或老師確認。" }
+        ],
+        messages: [
+          {
+            sender: "recruiter",
+            avatar: "📱",
+            text: "我在 Threads 看到你說想賺生活費，這邊有大學生手機專案。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "📱",
+            text: "辦一支空機就能現賺 8000，流程很簡單，今天就能拿錢。"
+          },
+          {
+            sender: "student",
+            text: "工作內容是什麼？為什麼要辦手機？"
+          },
+          {
+            sender: "recruiter",
+            avatar: "📱",
+            text: "你去通訊行辦門號分期，手機交給我們回收，公司每月幫你繳。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "📱",
+            text: "今天名額有限，帶雙證件和健保卡來就能辦。"
+          }
+        ],
+        choices: [
+          {
+            id: "phone-check-contract",
+            text: "先看合約再決定",
+            icon: "🛡️",
+            correct: true,
+            success: "✅ 防禦成功！你沒有把貸款和門號責任掛到自己名下。"
+          },
+          {
+            id: "phone-sign-contract",
+            text: "辦空機拿現金",
+            icon: "📱",
+            correct: false,
+            consequence: "手機已交出，但分期貸款和門號帳單仍在你名下。對方不繳時，你可能要自己負擔欠款。",
+            hint: "提示：合約在你名下，責任通常也會回到你身上。不要為了現金回饋辦不明分期。",
+            loss: 8000,
+            endingId: "ending-phone-loan"
+          },
+          {
+            id: "phone-send-id",
+            text: "先傳證件排隊",
+            icon: "📄",
+            correct: false,
+            consequence: "證件資料外流後，可能被拿去申辦門號、貸款或其他不明服務。",
+            hint: "提示：涉及證件、分期和門號時，不要先傳資料給私人帳號。",
+            loss: 4000,
+            endingId: "ending-phone-id-leak"
+          }
+        ]
+      },
+      {
+        id: "overseas-risk",
+        title: "第 7/9 關：海外高薪",
+        time: "昨天 22:40",
+        riskNote: "觀察提示：比較條件是否合理，以及對方是否催你立刻行動。",
+        toolboxResult: "海外高薪、包吃住、免經驗又催促立刻出發，可能涉及人口販運或強迫犯罪。",
+        toolboxChecks: [
+          { icon: "🛑", text: "不要赴約，不交護照。" },
+          { icon: "🔎", text: "查公司評價與新聞紀錄。" },
+          { icon: "👪", text: "先和家人、老師討論。" }
+        ],
+        messages: [
+          {
+            sender: "recruiter",
+            avatar: "🌏",
+            text: "IG 這邊急徵海外客服，月薪十萬，包吃包住，機票公司出。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🌏",
+            text: "不需經驗，只要會中文。工作內容大概是回覆客戶訊息，到現場會訓練。"
+          },
+          {
+            sender: "student",
+            text: "公司名稱和工作地點可以先給我嗎？"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🌏",
+            text: "公司資料到現場再說，怕名額被搶。明天帶護照來車站集合。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🌏",
+            text: "你先不要跟太多人講，家人通常會想太多。"
+          }
+        ],
+        choices: [
+          {
+            id: "do-not-go",
+            text: "先查公司，不赴約",
+            icon: "👪",
+            correct: true,
+            success: "✅ 防禦成功！你避開了人身安全風險。"
+          },
+          {
+            id: "listen-first",
+            text: "到車站聽說明",
+            icon: "🚉",
+            correct: false,
+            consequence: "現場可能被催促上車或交出證件，讓你很難安全離開。",
+            hint: "提示：海外工作資訊不清楚時，不要到指定地點集合。"
+          },
+          {
+            id: "bring-copy",
+            text: "只帶影本去看看",
+            icon: "📄",
+            correct: false,
+            consequence: "即使不帶正本，赴約仍可能面臨被控制行動或被帶離熟悉地點的風險。",
+            hint: "提示：問題不只在證件，還包含地點不明、條件不合理與催促出發。"
+          }
+        ]
+      },
+      {
+        id: "fake-order-boost",
+        title: "第 8/9 關：刷單代墊",
+        time: "今天 12:30",
+        riskNote: "觀察提示：注意對方是否要你先拿錢出來操作。",
+        toolboxResult: "刷單本身就是欺騙消費者的違規行為，要求代墊款項更是常見詐騙手法。",
+        toolboxChecks: [
+          { icon: "🛑", text: "不要先拿自己的錢墊付。" },
+          { icon: "🔁", text: "前幾次小額退款可能只是誘餌。" },
+          { icon: "✅", text: "退出群組，不參與刷單。" }
+        ],
+        messages: [
+          {
+            sender: "recruiter",
+            avatar: "🛒",
+            text: "LINE 群急徵電商助理，幫平台提升訂單量，幾分鐘就能賺零用錢。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🛒",
+            text: "前面幾單金額很小，完成後平台會退本金和獎金。"
+          },
+          {
+            sender: "student",
+            text: "所以我要先用自己的錢買嗎？"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🛒",
+            text: "對，你先代墊買商品，我們會連本帶利退給你，今天做才有名額。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "🛒",
+            text: "很多學生都有做，第一單通常 10 分鐘就拿到錢。"
+          }
+        ],
+        choices: [
+          {
+            id: "leave-group",
+            text: "不代墊，退出群組",
+            icon: "🚪",
+            correct: true,
+            success: "✅ 防禦成功！你沒有把錢放進代墊陷阱。"
+          },
+          {
+            id: "small-test",
+            text: "先做小額試單",
+            icon: "🧪",
+            correct: false,
+            consequence: "對方可能先退小錢讓你相信，等你代墊大筆款項後再消失。",
+            hint: "提示：小額成功不代表安全，常常只是誘餌。"
+          },
+          {
+            id: "wait-refund",
+            text: "退款後接大單",
+            icon: "🔁",
+            correct: false,
+            consequence: "你會被一步步引導投入更多錢，最後可能被捲款潛逃。",
+            hint: "提示：任何需要代墊的兼職都要拒絕，刷單也不應參與。"
+          }
+        ]
+      },
+      {
+        id: "unknown-package",
+        title: "第 9/9 關：代收包裹",
+        time: "週五 19:18",
+        riskNote: "觀察提示：想想你是否知道包裹來源、內容與責任。",
+        toolboxResult: "不明包裹可能含有違禁品。代收、轉交、寄送都可能讓自己承擔刑事風險。",
+        toolboxChecks: [
+          { icon: "🛑", text: "不替陌生人代收不明物品。" },
+          { icon: "💬", text: "可用簡短理由堅定拒絕。" },
+          { icon: "👪", text: "對方持續施壓時告訴家長或老師。" }
+        ],
+        messages: [
+          {
+            sender: "recruiter",
+            avatar: "📦",
+            text: "欸欸，我是阿傑隔壁班的同學啦，我們上次在球場有一起打過球。我最近不在家，可以幫我收幾個國外包裹嗎？"
+          },
+          {
+            sender: "recruiter",
+            avatar: "📦",
+            text: "收到一個給你 500 元走路工，很輕鬆，不用拆開。"
+          },
+          {
+            sender: "student",
+            text: "裡面是什麼？為什麼要寄到我家？"
+          },
+          {
+            sender: "recruiter",
+            avatar: "📦",
+            text: "只是朋友買的東西啦，內容我也不清楚，問太多反而麻煩。"
+          },
+          {
+            sender: "recruiter",
+            avatar: "📦",
+            text: "你收完放著就好，之後有人去拿，錢我先轉你，先不要跟家人講。"
+          }
+        ],
+        choices: [
+          {
+            id: "refuse-and-tell",
+            text: "拒絕並告訴大人",
+            icon: "👪",
+            correct: true,
+            success: "✅ 防禦成功！你避開了不明物品風險。"
+          },
+          {
+            id: "one-package",
+            text: "先收一件看看",
+            icon: "📦",
+            correct: false,
+            consequence: "包裹若含毒品或違禁品，你可能在不知情下成為運送者，面臨重罪風險。",
+            hint: "提示：不明物品不能用「只收一次」測試安全。"
+          },
+          {
+            id: "store-pickup",
+            text: "改寄超商代收",
+            icon: "🏪",
+            correct: false,
+            consequence: "改變收件地點不會降低物品本身的風險，領取紀錄仍可能連到你。",
+            hint: "提示：問題是替不熟的人處理不明包裹，不是寄到哪裡。"
+          }
+        ]
+      }
+    ];
+
+    const pressureStages = {
+      "typing-deposit": {
+        label: "第二層交鋒：限時名額施壓",
+        messages: [
+          { sender: "recruiter", avatar: "💬", text: "你不先加 Line，我沒辦法幫你保留名額。" },
+          { sender: "recruiter", avatar: "💬", text: "只剩最後 3 個帳號，錯過今天就沒有了。" }
+        ],
+        choices: [
+          {
+            id: "typing-pressure-safe",
+            text: "先查公司再回覆",
+            icon: "🛡️",
+            correct: true,
+            success: "✅ 交鋒成功！你沒有被限時話術推著走。"
+          },
+          {
+            id: "typing-pressure-pay",
+            text: "先付費保名額",
+            icon: "💸",
+            correct: false,
+            consequence: "你因為怕錯過名額而匯款，對方收到錢後就消失。",
+            hint: "提示：限時名額常用來讓人來不及查證。越急，越要停下來。",
+            loss: 500,
+            endingId: "ending-typing-fee"
+          },
+          {
+            id: "typing-pressure-private",
+            text: "進群但先不付款",
+            icon: "💬",
+            correct: false,
+            consequence: "對方轉到私人帳號後，持續用話術催你付款，原本的廣告也更難追查。",
+            hint: "提示：可疑徵才不要轉入私人通訊帳號繼續談。",
+            loss: 200,
+            endingId: "ending-private-chat"
+          }
+        ]
+      },
+      "mule-account": {
+        label: "第二層交鋒：流程權威施壓",
+        messages: [
+          { sender: "recruiter", avatar: "🏢", text: "其他新人都有照流程寄卡，只有你一直卡住。" },
+          { sender: "recruiter", avatar: "🏢", text: "今天不補資料，會計就先取消你的錄取資格。" }
+        ],
+        choices: [
+          {
+            id: "account-pressure-safe",
+            text: "改問 165 與老師",
+            icon: "📞",
+            correct: true,
+            success: "✅ 交鋒成功！你沒有把帳戶控制權交出去。"
+          },
+          {
+            id: "account-pressure-mail",
+            text: "先寄卡保錄取",
+            icon: "📦",
+            correct: false,
+            consequence: "帳戶可能被拿去收詐騙款項，變成警示帳戶並面臨法律責任。",
+            hint: "提示：錄取資格不能用交出提款卡與密碼交換。",
+            loss: 10000,
+            endingId: "ending-warning-account"
+          },
+          {
+            id: "account-pressure-password",
+            text: "只先補密碼",
+            icon: "🔑",
+            correct: false,
+            consequence: "密碼外流後，帳戶安全立刻受到威脅，也可能被進一步要求交卡。",
+            hint: "提示：密碼永遠不是公司核薪需要的資料。",
+            loss: 4000,
+            endingId: "ending-password-leak"
+          }
+        ]
+      },
+      "pyramid-course": {
+        label: "第二層交鋒：人情與回本施壓",
+        messages: [
+          { sender: "recruiter", avatar: "🙋", text: "收入就是公司給的推廣獎金啊，這絕對合法啦！" },
+          { sender: "recruiter", avatar: "🙋", text: "你現在不加入，以後同學都開始賺了會很可惜。" },
+          { sender: "recruiter", avatar: "🙋", text: "而且你只要找朋友一起來，就不算自己花錢。" }
+        ],
+        choices: [
+          {
+            id: "pyramid-pressure-safe",
+            text: "不拉朋友，找老師確認",
+            icon: "🏫",
+            correct: true,
+            success: "✅ 交鋒成功！你沒有讓人情壓力替你做決定。"
+          },
+          {
+            id: "pyramid-pressure-buy",
+            text: "先買課，再找人",
+            icon: "📚",
+            correct: false,
+            consequence: "你花錢買下不需要的課程，還被要求繼續找人加入才能回本。",
+            hint: "提示：收入若主要靠找人加入，就要先停下來查證。",
+            loss: 3000,
+            endingId: "ending-course-purchase"
+          },
+          {
+            id: "pyramid-pressure-friend",
+            text: "找朋友一起分攤",
+            icon: "👥",
+            correct: false,
+            consequence: "朋友也被帶進風險模式，金錢損失之外，人際關係也受影響。",
+            hint: "提示：不要把不確定的賺錢模式轉推給同學。",
+            loss: 1500,
+            endingId: "ending-friend-pressure"
+          }
+        ]
+      },
+      "phone-loan-trap": {
+        label: "第二層交鋒：名額與代辦施壓",
+        messages: [
+          { sender: "recruiter", avatar: "📱", text: "合約要先用你的真實資料建檔，系統才能產生專屬合約給你喔。" },
+          { sender: "recruiter", avatar: "📱", text: "你剛剛說有興趣，我已經幫你保留名額了。" },
+          { sender: "recruiter", avatar: "📱", text: "不方便來也沒關係，先把證件照片傳我，我幫你送件。" }
+        ],
+        choices: [
+          {
+            id: "phone-pressure-safe",
+            text: "先問家人再送件",
+            icon: "👪",
+            correct: true,
+            success: "✅ 交鋒成功！你沒有讓對方代辦不明分期。"
+          },
+          {
+            id: "phone-pressure-id",
+            text: "傳證件先卡位",
+            icon: "📄",
+            correct: false,
+            consequence: "對方可能拿你的證件資料申辦門號、分期或貸款，後續帳單仍可能找上你。",
+            hint: "提示：證件照片不能交給私人帳號代辦分期或門號。",
+            loss: 4000,
+            endingId: "ending-phone-id-leak"
+          },
+          {
+            id: "phone-pressure-store",
+            text: "到門市現場辦",
+            icon: "📱",
+            correct: false,
+            consequence: "你簽下門號與分期合約後，手機交給對方，但付款責任仍可能留在你身上。",
+            hint: "提示：現場有人催促簽約時，更要先離開、查證，再決定。",
+            loss: 9000,
+            endingId: "ending-phone-loan"
+          }
+        ]
+      },
+      "overseas-risk": {
+        label: "第二層交鋒：違約恐嚇",
+        messages: [
+          { sender: "recruiter", avatar: "🌏", text: "你剛剛已經點擊同意了喔，不來就是違約。" },
+          { sender: "recruiter", avatar: "🌏", text: "這份合約已經生效了，你今天不出現，我們就直接把存證信函寄到你家，向你父母索賠十萬違約金！" }
+        ],
+        choices: [
+          {
+            id: "overseas-pressure-safe",
+            text: "不付錢，截圖求助",
+            icon: "👪",
+            correct: true,
+            success: "✅ 交鋒成功！你把恐嚇訊息留下來，並找可信任的人協助。"
+          },
+          {
+            id: "overseas-pressure-pay",
+            text: "害怕違約，先轉訂金",
+            icon: "💸",
+            correct: false,
+            consequence: "你因恐慌而付款，對方可能繼續用更高金額威脅你。",
+            hint: "提示：不合理的違約恐嚇要截圖求助，不要私下付錢。",
+            loss: 5000,
+            endingId: "ending-threat-payment"
+          },
+          {
+            id: "overseas-pressure-meet",
+            text: "去現場解釋清楚",
+            icon: "🚉",
+            correct: false,
+            consequence: "赴約會讓你進入不熟悉環境，可能面臨被帶走或交出證件的風險。",
+            hint: "提示：對方已經恐嚇你時，更不應單獨赴約。",
+            loss: 7000,
+            endingId: "ending-risk-meeting"
+          }
+        ]
+      },
+      "fake-order-boost": {
+        label: "第二層交鋒：小額成功誘餌",
+        messages: [
+          { sender: "recruiter", avatar: "🛒", text: "第一單你如果不放心，可以先做 200 元的小單。" },
+          { sender: "recruiter", avatar: "🛒", text: "做完馬上退 240，下一單金額才會比較高。" }
+        ],
+        choices: [
+          {
+            id: "order-pressure-safe",
+            text: "不試單，直接退出",
+            icon: "🚪",
+            correct: true,
+            success: "✅ 交鋒成功！你看穿了小額誘餌。"
+          },
+          {
+            id: "order-pressure-small",
+            text: "只做小額試單",
+            icon: "🧪",
+            correct: false,
+            consequence: "小額退款讓你放下戒心，後續更容易投入大筆代墊款。",
+            hint: "提示：詐騙常先用小額成功建立信任。",
+            loss: 200,
+            endingId: "ending-small-bait"
+          },
+          {
+            id: "order-pressure-bigger",
+            text: "做完再接大單",
+            icon: "🔁",
+            correct: false,
+            consequence: "你被引導投入更多代墊款，金額變大後對方就可能消失。",
+            hint: "提示：代墊越做越大，是刷單陷阱常見節奏。",
+            loss: 6000,
+            endingId: "ending-big-order"
+          }
+        ]
+      },
+      "unknown-package": {
+        label: "第二層交鋒：朋友關係施壓",
+        messages: [
+          { sender: "recruiter", avatar: "📦", text: "你這樣很不夠朋友耶，只是收一下又不是叫你做壞事。" },
+          { sender: "recruiter", avatar: "📦", text: "我先轉你 1000，拜託不要跟家人講，免得他們誤會。" }
+        ],
+        choices: [
+          {
+            id: "package-pressure-safe",
+            text: "不收，立刻告訴大人",
+            icon: "👪",
+            correct: true,
+            success: "✅ 交鋒成功！你沒有讓人情壓力蓋過安全判斷。"
+          },
+          {
+            id: "package-pressure-money",
+            text: "收錢後幫一次",
+            icon: "💰",
+            correct: false,
+            consequence: "包裹若含違禁品，你可能因代收與轉交面臨嚴重刑事風險。",
+            hint: "提示：報酬越高、內容越不清楚，越不能代收。",
+            loss: 9000,
+            endingId: "ending-unknown-package"
+          },
+          {
+            id: "package-pressure-secret",
+            text: "答應但先保密",
+            icon: "🤐",
+            correct: false,
+            consequence: "保密會讓你少了求助機會，也讓對方更容易繼續施壓。",
+            hint: "提示：有人要求你不要告訴家人或老師，就是重要警訊。",
+            loss: 3000,
+            endingId: "ending-kept-secret"
+          }
+        ]
+      }
+    };
+
+    const endingCatalog = [
+      { id: "ending-line-pressure", icon: "💬", title: "私人帳號風險", detail: "轉到私人通訊軟體後，查證與留證都變困難。" },
+      { id: "ending-typing-fee", icon: "🧾", title: "開通費踩雷", detail: "先付開通費後，對方消失或繼續要求付款。" },
+      { id: "ending-private-chat", icon: "📱", title: "私聊施壓紀錄", detail: "被帶離公開平台後，更容易被限時話術推著走。" },
+      { id: "ending-card-photo", icon: "🏦", title: "帳戶資料外流", detail: "卡片資料外流後，可能被進一步騙取更多帳戶資訊。" },
+      { id: "ending-warning-account", icon: "🚨", title: "警示帳戶案例", detail: "帳戶被拿去收詐騙款項，可能承擔法律責任。" },
+      { id: "ending-password-leak", icon: "🔑", title: "密碼外洩案例", detail: "密碼不是核薪資料，外洩就會讓帳戶失去保護。" },
+      { id: "ending-course-purchase", icon: "📚", title: "課程購買陷阱", detail: "先買課程再賺錢，可能只是把你變成消費者。" },
+      { id: "ending-friend-pressure", icon: "👥", title: "同學也被拉入", detail: "不確定的賺錢模式轉推給朋友，會傷害信任關係。" },
+      { id: "ending-risk-meeting", icon: "🚉", title: "危險赴約紀錄", detail: "不明地點與催促集合，可能帶來人身安全風險。" },
+      { id: "ending-threat-payment", icon: "⚖️", title: "恐嚇付款案例", detail: "被違約恐嚇時付款，可能讓對方繼續加碼威脅。" },
+      { id: "ending-small-bait", icon: "🧪", title: "小額誘餌紀錄", detail: "前幾次成功退款，可能只是為了讓你相信對方。" },
+      { id: "ending-big-order", icon: "🛒", title: "大額代墊陷阱", detail: "代墊金額變大後，對方可能立刻捲款消失。" },
+      { id: "ending-unknown-package", icon: "📦", title: "不明包裹案例", detail: "替不熟的人代收不明物品，可能承擔刑事風險。" },
+      { id: "ending-kept-secret", icon: "🤐", title: "被要求保密", detail: "對方要求別告訴大人，代表你更需要求助。" },
+      { id: "ending-overdefense-job", icon: "🏪", title: "過度防禦：錯失工作", detail: "合理報到資料被誤判成詐騙，可能錯過真實機會。" },
+      { id: "ending-overshare-data", icon: "🔑", title: "過度提供資料", detail: "合理報到不代表要交出提款卡、密碼或證件正本。" },
+      { id: "ending-overdefense-uniform", icon: "👟", title: "過度防禦：服裝誤判", detail: "一般工作服裝要求與高價強迫購買不同。" },
+      { id: "ending-wrong-uniform", icon: "👟", title: "規格沒問清楚", detail: "合理要求也要問清楚規格，避免買到不能用的服裝或鞋子。" },
+      { id: "ending-phone-loan", icon: "📱", title: "手機分期債務", detail: "手機交出去不代表合約消失，分期與門號帳單可能仍在本人名下。" },
+      { id: "ending-phone-id-leak", icon: "📄", title: "證件代辦風險", detail: "證件照片外流後，可能被拿去申辦門號、分期或其他不明服務。" },
+      { id: "title-fraud-master", icon: "🛡️", title: "防詐大師", detail: "全部關卡都守住判斷，保住存款與安全界線。" }
+    ];
+
+    const choiceRiskMap = {
+      "ask-on-line": { loss: 200, endingId: "ending-line-pressure" },
+      "small-payment": { loss: 500, endingId: "ending-typing-fee" },
+      "photo-card": { loss: 1500, endingId: "ending-card-photo" },
+      "mail-card": { loss: 10000, endingId: "ending-warning-account" },
+      "try-course": { loss: 3000, endingId: "ending-course-purchase" },
+      "invite-friends": { loss: 1500, endingId: "ending-friend-pressure" },
+      "listen-first": { loss: 7000, endingId: "ending-risk-meeting" },
+      "bring-copy": { loss: 3000, endingId: "ending-risk-meeting" },
+      "small-test": { loss: 200, endingId: "ending-small-bait" },
+      "wait-refund": { loss: 6000, endingId: "ending-big-order" },
+      "one-package": { loss: 9000, endingId: "ending-unknown-package" },
+      "store-pickup": { loss: 3000, endingId: "ending-unknown-package" }
+    };
+
+    class JobDefenseGame {
+      constructor(levelData) {
+        this.levels = levelData;
+        this.currentLevelIndex = 0;
+        this.level = this.levels[this.currentLevelIndex];
+        this.score = 0;
+        this.startingMoney = 10000;
+        this.money = this.startingMoney;
+        this.perfectRun = true;
+        this.gameStarted = false;
+        this.inPressureStage = false;
+        this.levelCompleted = false;
+        this.chatArea = document.querySelector("#chatArea");
+        this.choicesArea = document.querySelector("#choices");
+        this.stageLabel = document.querySelector("#stageLabel");
+        this.scoreLabel = document.querySelector("#scoreLabel");
+        this.moneyLabel = document.querySelector("#moneyLabel");
+        this.moneyFill = document.querySelector("#moneyFill");
+        this.timerLabel = document.querySelector("#timerLabel");
+        this.timerFill = document.querySelector("#timerFill");
+        this.feedbackBanner = document.querySelector("#feedbackBanner");
+        this.liveRegion = document.querySelector("#liveRegion");
+        this.startModal = document.querySelector("#startModal");
+        this.startGameButton = document.querySelector("#startGameButton");
+        this.consequenceModal = document.querySelector("#consequenceModal");
+        this.toolboxModal = document.querySelector("#toolboxModal");
+        this.collectionModal = document.querySelector("#collectionModal");
+        this.consequenceText = document.querySelector("#consequenceText");
+        this.lossText = document.querySelector("#lossText");
+        this.hintText = document.querySelector("#hintText");
+        this.toolboxResult = document.querySelector("#toolboxResult");
+        this.toolboxChecks = document.querySelector("#toolboxChecks");
+        this.collectionSummary = document.querySelector("#collectionSummary");
+        this.collectionGrid = document.querySelector("#collectionGrid");
+        this.buyHintButton = document.querySelector("#buyHintButton");
+        this.purchasedHint = document.querySelector("#purchasedHint");
+        this.hintPreview = document.querySelector("#hintPreview");
+        this.toast = document.querySelector("#toast");
+        this.unlockedEndings = this.loadCollection();
+        this.timerId = null;
+        this.timerDuration = 15;
+        this.timeLeft = this.timerDuration;
+        this.timerActive = false;
+        this.waitingForBottom = false;
+        this.currentHintText = "";
+        this.hintPurchased = false;
+        this.pendingRisk = false;
+        this.lastFocus = null;
+        this.toastTimeout = null;
+      }
+
+      init() {
+        this.updateMoney();
+        this.updateTimerDisplay();
+        this.renderCollection();
+        this.renderLevel();
+        this.bindModalControls();
+        this.startGameButton.addEventListener("click", () => {
+          this.startGame();
+        });
+        this.chatArea.addEventListener("scroll", () => {
+          this.maybeStartTimerAfterScroll();
+        });
+        document.querySelector("#toolboxButton").addEventListener("click", () => {
+          this.stopTimer();
+          this.openModal(this.toolboxModal);
+        });
+        document.querySelector("#collectionButton").addEventListener("click", () => {
+          this.stopTimer();
+          this.renderCollection();
+          this.openModal(this.collectionModal);
+        });
+        this.buyHintButton.addEventListener("click", () => {
+          this.buyHint();
+        });
+      }
+
+      startGame() {
+        this.gameStarted = true;
+        this.closeModal(this.startModal);
+        this.showToast("請先讀完對話，滑到底後開始倒數。");
+        this.prepareTimerAfterScroll();
+      }
+
+      renderLevel() {
+        this.stopTimer();
+        this.level = this.levels[this.currentLevelIndex];
+        this.inPressureStage = false;
+        this.levelCompleted = false;
+        this.pendingRisk = false;
+        this.currentHintText = this.level.riskNote;
+        this.hintPurchased = false;
+        this.hideFeedback();
+        this.stageLabel.textContent = this.getStageLabel();
+        this.chatArea.innerHTML = `<div class="day-label">${this.level.time}</div>`;
+
+        this.level.messages.forEach((message) => {
+          this.chatArea.appendChild(this.createMessage(message));
+        });
+
+        this.renderToolbox();
+        this.renderDecisionTools();
+        this.renderChoices();
+        this.resetChatScroll();
+      }
+
+      resetChatScroll() {
+        this.chatArea.scrollTop = 0;
+        requestAnimationFrame(() => {
+          this.chatArea.scrollTop = 0;
+          this.prepareTimerAfterScroll();
+        });
+      }
+
+      getStageLabel() {
+        return `第 ${this.currentLevelIndex + 1}/${this.levels.length} 關`;
+      }
+
+      renderDecisionTools() {
+        this.buyHintButton.disabled = !this.gameStarted || this.hintPurchased || this.money < 500 || this.levelCompleted;
+        this.buyHintButton.textContent = this.hintPurchased ? "💡 已買" : "💡 -$500";
+        this.buyHintButton.setAttribute("aria-label", this.hintPurchased ? "提示已購買" : "購買提示，扣除遊戲存款 500 元");
+        this.hintPreview.textContent = this.currentHintText;
+        this.purchasedHint.classList.remove("show");
+      }
+
+      buyHint() {
+        if (this.hintPurchased || this.money < 500 || this.levelCompleted) return;
+
+        this.money = Math.max(0, this.money - 500);
+        this.perfectRun = false;
+        this.hintPurchased = true;
+        this.updateMoney();
+        this.renderDecisionTools();
+        this.addSystemMessage(`已購買提示：${this.currentHintText}`, false);
+        this.showToast("提示已加入對話底部，遊戲存款 -$500。");
+        this.liveRegion.textContent = "已購買提示，遊戲存款扣除 500 元。";
+      }
+
+      renderToolbox() {
+        this.toolboxResult.textContent = this.level.toolboxResult;
+        this.toolboxChecks.innerHTML = "";
+
+        this.level.toolboxChecks.forEach((item) => {
+          const li = document.createElement("li");
+          li.innerHTML = `<span aria-hidden="true">${item.icon}</span><span>${item.text}</span>`;
+          this.toolboxChecks.appendChild(li);
+        });
+      }
+
+      createMessage(message) {
+        const row = document.createElement("div");
+        row.className = `message-row ${message.sender}`;
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = message.text;
+
+        if (message.sender === "student") {
+          row.appendChild(bubble);
+          return row;
+        }
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar";
+        avatar.setAttribute("aria-hidden", "true");
+        avatar.textContent = message.avatar;
+        row.append(avatar, bubble);
+        return row;
+      }
+
+      renderChoices(choiceList = this.level.choices) {
+        this.choicesArea.innerHTML = "";
+        this.shuffle([...choiceList]).forEach((choice) => {
+          const button = document.createElement("button");
+          button.className = "choice-button";
+          button.type = "button";
+          button.disabled = true;
+          button.dataset.choiceId = choice.id;
+          button.innerHTML = `
+            <span class="choice-icon" aria-hidden="true">${choice.icon}</span>
+            <span>${choice.text}</span>
+            <span class="choice-arrow" aria-hidden="true">›</span>
+          `;
+          button.addEventListener("click", () => this.handleChoice(choice, button));
+          this.choicesArea.appendChild(button);
+        });
+      }
+
+      enableChoices() {
+        this.choicesArea.querySelectorAll("button").forEach((button) => {
+          button.disabled = false;
+        });
+      }
+
+      handleChoice(choice, button) {
+        if (this.levelCompleted || this.pendingRisk) return;
+
+        this.stopTimer();
+        this.hideFeedback();
+        this.addStudentMessage(choice.text);
+
+        if (choice.correct) {
+          const pressure = pressureStages[this.level.id];
+          if (!this.inPressureStage && pressure) {
+            this.startPressureStage(pressure, button);
+            return;
+          }
+
+          this.completeLevel(choice, button);
+          return;
+        }
+
+        this.applyRisk(choice);
+      }
+
+      startTimer() {
+        this.stopTimer();
+        if (this.levelCompleted || !this.gameStarted) return;
+
+        this.timeLeft = this.timerDuration;
+        this.timerActive = true;
+        this.waitingForBottom = false;
+        this.enableChoices();
+        this.updateTimerDisplay();
+        this.timerId = setInterval(() => {
+          this.timeLeft -= 1;
+          this.updateTimerDisplay();
+
+          if (this.timeLeft <= 0) {
+            this.handleTimePressure();
+          }
+        }, 1000);
+      }
+
+      stopTimer() {
+        if (this.timerId) {
+          clearInterval(this.timerId);
+          this.timerId = null;
+        }
+        this.timerActive = false;
+      }
+
+      updateTimerDisplay() {
+        const ratio = Math.max(0, Math.min(1, this.timeLeft / this.timerDuration));
+        this.timerLabel.textContent = `${Math.max(0, this.timeLeft)} 秒`;
+        this.timerFill.style.width = `${ratio * 100}%`;
+        this.timerFill.classList.toggle("low", ratio <= 0.35);
+      }
+
+      prepareTimerAfterScroll() {
+        this.stopTimer();
+        this.disableChoices();
+        this.timeLeft = this.timerDuration;
+        this.updateTimerDisplay();
+        if (!this.gameStarted || this.levelCompleted || this.pendingRisk) return;
+
+        this.waitingForBottom = true;
+        if (this.isChatAtBottom()) {
+          this.startTimer();
+          return;
+        }
+
+        //this.showToast("請先讀完對話，滑到底後開始倒數。");
+      }
+
+      maybeStartTimerAfterScroll() {
+        if (!this.waitingForBottom || this.timerActive || this.levelCompleted || this.pendingRisk) return;
+        if (!this.isChatAtBottom()) return;
+        this.startTimer();
+        //this.showToast("倒數開始：15 秒");
+      }
+
+      isChatAtBottom() {
+        return this.chatArea.scrollTop + this.chatArea.clientHeight >= this.chatArea.scrollHeight - 8;
+      }
+
+      handleTimePressure() {
+        this.stopTimer();
+        if (this.levelCompleted || this.pendingRisk) return;
+
+        this.money = Math.max(0, this.money - 300);
+        this.perfectRun = false;
+        this.updateMoney();
+        this.addMessageAndScroll({
+          sender: "recruiter",
+          avatar: "⏰",
+          text: "你到底要不要做？後面還很多人在排隊！"
+        });
+        this.showStageFeedback("⚡ 已讀壓力出現：遊戲存款 -$300。先停一下，不要被催促帶著走。");
+        this.liveRegion.textContent = "時間壓力出現，遊戲存款扣除 300 元。";
+        this.prepareTimerAfterScroll();
+      }
+
+      startPressureStage(pressure, button) {
+        this.stopTimer();
+        this.inPressureStage = true;
+        this.currentHintText = pressure.hintNote || "對方正在用催促、恐嚇或人情壓力影響你。先停下來確認風險。";
+        this.hintPurchased = false;
+        this.renderDecisionTools();
+        button.classList.add("correct", "success-pulse");
+        this.showStageFeedback("✅ 第一層判斷正確。對方開始施壓，請再守住一次。");
+
+        pressure.messages.forEach((message) => {
+          this.chatArea.appendChild(this.createMessage(message));
+        });
+
+        this.renderChoices(pressure.choices);
+        this.prepareTimerAfterScroll();
+        this.liveRegion.textContent = pressure.label;
+      }
+
+      completeLevel(choice, button) {
+        this.stopTimer();
+        this.levelCompleted = true;
+        this.score += 10;
+        this.scoreLabel.textContent = `${this.score} 分`;
+        button.classList.add("correct", "success-pulse");
+        this.disableChoices();
+        this.renderDecisionTools();
+        this.showFeedback(choice.success);
+        this.playPositiveTone();
+        this.liveRegion.textContent = choice.success;
+      }
+
+      applyRisk(choice) {
+        const risk = this.getChoiceRisk(choice);
+        this.pendingRisk = true;
+        this.perfectRun = false;
+        this.money = Math.max(0, this.money - risk.loss);
+        this.updateMoney();
+        this.renderDecisionTools();
+        this.unlockEnding(risk.endingId);
+        this.consequenceText.textContent = choice.consequence;
+        this.lossText.textContent = risk.loss > 0
+          ? `遊戲存款 -$${risk.loss.toLocaleString("zh-TW")}，目前剩 $${this.money.toLocaleString("zh-TW")}。這是風險嚴重度，不是真實罰鍰。`
+          : "這次沒有扣款，但風險已記錄到圖鑑。";
+        this.hintText.textContent = choice.hint;
+        this.liveRegion.textContent = `選擇有風險，存款扣除 ${risk.loss} 元。${choice.hint}`;
+        this.playWarningTone();
+
+        setTimeout(() => {
+          this.pendingRisk = false;
+          this.openModal(this.consequenceModal);
+        }, 600);
+      }
+
+      getChoiceRisk(choice) {
+        const mapped = choiceRiskMap[choice.id] || {};
+        return {
+          loss: choice.loss ?? mapped.loss ?? 1000,
+          endingId: choice.endingId ?? mapped.endingId ?? null
+        };
+      }
+
+      updateMoney() {
+        const ratio = Math.max(0, Math.min(1, this.money / this.startingMoney));
+        this.moneyLabel.textContent = `$${this.money.toLocaleString("zh-TW")}`;
+        this.moneyFill.style.width = `${ratio * 100}%`;
+        this.moneyFill.classList.toggle("low", ratio <= 0.35);
+      }
+
+      loadCollection() {
+        try {
+          const saved = localStorage.getItem("jobDefenseCollection");
+          return new Set(saved ? JSON.parse(saved) : []);
+        } catch (error) {
+          return new Set();
+        }
+      }
+
+      saveCollection() {
+        try {
+          localStorage.setItem("jobDefenseCollection", JSON.stringify([...this.unlockedEndings]));
+        } catch (error) {
+          // Browser privacy modes may block storage; the current play session still works.
+        }
+      }
+
+      unlockEnding(endingId) {
+        if (!endingId) return;
+        this.unlockedEndings.add(endingId);
+        this.saveCollection();
+        this.renderCollection();
+      }
+
+      renderCollection() {
+        const unlockedCount = endingCatalog.filter((ending) => this.unlockedEndings.has(ending.id)).length;
+        this.collectionSummary.textContent = `已解鎖 ${unlockedCount} / ${endingCatalog.length} 張。收集錯誤後果可以幫助練習辨識陷阱。`;
+        this.collectionGrid.innerHTML = "";
+
+        endingCatalog.forEach((ending) => {
+          const unlocked = this.unlockedEndings.has(ending.id);
+          const card = document.createElement("div");
+          card.className = `ending-card ${unlocked ? "" : "locked"}`;
+          card.innerHTML = `
+            <span aria-hidden="true">${unlocked ? ending.icon : "🔒"}</span>
+            <span><strong>${unlocked ? ending.title : "尚未解鎖"}</strong>${unlocked ? ending.detail : "探索不同選擇後會出現。"}</span>
+          `;
+          this.collectionGrid.appendChild(card);
+        });
+      }
+
+      disableChoices() {
+        this.choicesArea.querySelectorAll("button").forEach((button) => {
+          button.disabled = true;
+        });
+      }
+
+      addStudentMessage(text) {
+        const message = this.createMessage({
+          sender: "student",
+          text
+        });
+        this.chatArea.appendChild(message);
+        this.chatArea.scrollTop = this.chatArea.scrollHeight;
+      }
+
+      addMessageAndScroll(messageData) {
+        this.chatArea.appendChild(this.createMessage(messageData));
+        this.chatArea.scrollTop = this.chatArea.scrollHeight;
+      }
+
+      addSystemMessage(text, shouldScroll = true) {
+        const message = document.createElement("div");
+        message.className = "system-message";
+        message.textContent = text;
+        this.chatArea.appendChild(message);
+        if (shouldScroll) {
+          this.chatArea.scrollTop = this.chatArea.scrollHeight;
+        }
+      }
+
+      showToast(text) {
+        clearTimeout(this.toastTimeout);
+        this.toast.textContent = text;
+        this.toast.classList.add("show");
+        this.toastTimeout = setTimeout(() => {
+          this.toast.classList.remove("show");
+        }, 1800);
+      }
+
+      showFeedback(text) {
+        const hasNextLevel = this.currentLevelIndex < this.levels.length - 1;
+        const buttonLabel = hasNextLevel ? "下一關" : "完成複習";
+
+        this.feedbackBanner.className = "feedback-banner success show";
+        this.feedbackBanner.innerHTML = `
+          <span class="feedback-text"><span aria-hidden="true">✅</span><span>${text}</span></span>
+          <button class="next-button" type="button">${buttonLabel}</button>
+        `;
+
+        this.feedbackBanner.querySelector("button").addEventListener("click", () => {
+          if (hasNextLevel) {
+            this.currentLevelIndex += 1;
+            this.renderLevel();
+            this.liveRegion.textContent = `進入${this.getStageLabel()}`;
+            return;
+          }
+
+          if (this.perfectRun && this.money === this.startingMoney) {
+            this.unlockEnding("title-fraud-master");
+          }
+
+          this.liveRegion.textContent = `全部關卡完成，總分 ${this.score} 分。`;
+          this.feedbackBanner.innerHTML = `
+            <span class="feedback-text"><span aria-hidden="true">🛡️</span><span>全部關卡完成！總分 ${this.score} 分，遊戲存款 $${this.money.toLocaleString("zh-TW")}。</span></span>
+            <span class="end-actions">
+              <button class="next-button" type="button" data-view-collection>查看圖鑑</button>
+              <button class="next-button" type="button" data-restart-game>再玩一次</button>
+            </span>
+          `;
+
+          this.feedbackBanner.querySelector("[data-restart-game]").addEventListener("click", () => {
+            this.restartGame();
+          });
+
+          this.feedbackBanner.querySelector("[data-view-collection]").addEventListener("click", () => {
+            this.renderCollection();
+            this.openModal(this.collectionModal);
+          });
+        });
+      }
+
+      restartGame() {
+        this.currentLevelIndex = 0;
+        this.level = this.levels[this.currentLevelIndex];
+        this.score = 0;
+        this.money = this.startingMoney;
+        this.perfectRun = true;
+        this.scoreLabel.textContent = "0 分";
+        this.updateMoney();
+        this.renderLevel();
+        this.liveRegion.textContent = "重新開始遊戲。";
+      }
+
+      showStageFeedback(text) {
+        const icon = text.startsWith("⚡") ? "⚡" : "✅";
+        const cleanText = text.replace(/^✅\s?|^⚡\s?/, "");
+        this.addSystemMessage(`${icon} ${cleanText}`);
+        //this.showToast(cleanText);
+      }
+
+      hideFeedback() {
+        this.feedbackBanner.className = "feedback-banner";
+        this.feedbackBanner.textContent = "";
+      }
+
+      bindModalControls() {
+        document.querySelectorAll("[data-close-modal]").forEach((button) => {
+          button.addEventListener("click", () => {
+            this.closeModal(this.consequenceModal);
+            if (!this.levelCompleted) this.prepareTimerAfterScroll();
+          });
+        });
+
+        document.querySelectorAll("[data-close-toolbox]").forEach((button) => {
+          button.addEventListener("click", () => {
+            this.closeModal(this.toolboxModal);
+            if (!this.levelCompleted) this.prepareTimerAfterScroll();
+          });
+        });
+
+        document.querySelectorAll("[data-close-collection]").forEach((button) => {
+          button.addEventListener("click", () => {
+            this.closeModal(this.collectionModal);
+            if (!this.levelCompleted) this.prepareTimerAfterScroll();
+          });
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key !== "Escape") return;
+          const consequenceWasOpen = this.consequenceModal.classList.contains("open");
+          const toolboxWasOpen = this.toolboxModal.classList.contains("open");
+          const collectionWasOpen = this.collectionModal.classList.contains("open");
+          this.closeModal(this.consequenceModal);
+          this.closeModal(this.toolboxModal);
+          this.closeModal(this.collectionModal);
+          if ((consequenceWasOpen || toolboxWasOpen || collectionWasOpen) && !this.levelCompleted) this.prepareTimerAfterScroll();
+        });
+      }
+
+      openModal(modal) {
+        this.lastFocus = document.activeElement;
+        modal.classList.add("open");
+        const closeButton = modal.querySelector("button");
+        closeButton.focus();
+      }
+
+      closeModal(modal) {
+        modal.classList.remove("open");
+        if (this.lastFocus && typeof this.lastFocus.focus === "function") {
+          this.lastFocus.focus();
+        }
+      }
+
+      shuffle(items) {
+        for (let index = items.length - 1; index > 0; index -= 1) {
+          const randomIndex = Math.floor(Math.random() * (index + 1));
+          [items[index], items[randomIndex]] = [items[randomIndex], items[index]];
+        }
+        return items;
+      }
+
+      playPositiveTone() {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+
+        const audio = new AudioContext();
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(660, audio.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(880, audio.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.001, audio.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.2, audio.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.18);
+
+        oscillator.connect(gain);
+        gain.connect(audio.destination);
+        oscillator.start();
+        oscillator.stop(audio.currentTime + 0.2);
+      }
+
+      playWarningTone() {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+
+        const audio = new AudioContext();
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+
+        oscillator.type = "triangle";
+        oscillator.frequency.setValueAtTime(220, audio.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(140, audio.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.001, audio.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.18, audio.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.24);
+
+        oscillator.connect(gain);
+        gain.connect(audio.destination);
+        oscillator.start();
+        oscillator.stop(audio.currentTime + 0.26);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const game = new JobDefenseGame(levels);
+      game.init();
+    });
+  </script>
+</body>
+</html>
